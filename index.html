@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Prompt</title>
+    <link rel="icon" href="cmd.png" type="image/png"> <!-- Add the link to your icon file -->
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #131212;
+            color: #fff;
+            overflow: hidden;
+        }
+        .cli-window {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .cli-header {
+            background-color: #464444;
+            height: 40px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+        .cli-header .left-content {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            padding: 9px;
+            background-color: #131212;
+            border-radius: 10px 0 0 5px;
+            margin-right: 30px;
+        }
+        .cli-header .left-content img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .cli-header .left-content .plus-btn, .cli-header .left-content .back-btn {
+            font-size: 18px;
+            cursor: pointer;
+            color: #fff;
+            padding: 0 5px;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+        .cli-header .left-content .plus-btn::after {
+            content: "|";
+            color: #9b9b9b;
+            margin: 0 5px;
+        }
+        .cli-header .close-btn, .cli-header .minimize-btn, .cli-header .maximize-btn {
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            padding-left: 20px;
+            padding: 40px;
+
+        }
+        .cli-body {
+            padding: 40px 20px 20px 20px;
+            overflow-y: auto;
+            height: calc(100% - 40px);
+            box-sizing: border-box;
+            background-color: #131212;
+            position: relative;
+        }
+
+        .cli-prompt {
+            color: #fff;
+            font-weight: bold;
+            display: inline-block;
+            width: 180px;
+        }
+        :root {
+    --text-color: #fff; /* Default text color */
+}
+
+.cli-body, .cli-prompt {
+    color: var(--text-color); /* Use custom text color */
+}
+
+        .cli-input {
+            background-color: #242222; /* Grey background */
+            border: none;
+            outline: none;
+            color: #fff;
+            width: calc(100% - 200px);
+            padding: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            caret-color: #ffffff;
+            position: fixed; /* Fixed position to stick at the bottom */
+            bottom: 0; /* Positioned at the bottom */
+            left: 0;
+            z-index: 999;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #464444;
+            min-width: 120px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .dropdown-content a {
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        .dropdown-content a:hover {
+            background-color: #333;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="cli-window">
+    <div class="cli-header">
+        <div class="left-content">
+            <img src="cmd.png" alt="cmd-icon">
+            <span>Command Prompt</span>
+            <div class="dropdown">
+                <div class="back-btn">&lt;</div>
+                <div class="dropdown-content">
+                    <a href="#"><img src="cmd.png" alt=""> Developer</a>
+                    <a href="#"><img src="cmd.png" alt=""> Is</a>
+                    <a href="#"><img src="cmd.png" alt=""> andrew_dxz2</a>
+                </div>
+            </div>
+            <div class="add-tab-btn">+</div> <!-- Added the + button -->
+        </div>
+        <div>
+            <span class="minimize-btn">-</span>
+            <span class="maximize-btn">[]</span>
+            <span class="close-btn">x</span>
+        </div>
+    </div>
+    <div class="cli-body" id="cli-body">
+        Microsoft Windows [Version 10.0.22631.3296]<br>
+        (c) Microsoft Corporation. All rights reserved.<br><br>
+        C:\Users\Andrew> 
+    </div>
+    <input type="text" class="cli-input" id="cli-input" autofocus="">
+</div>
+
+<script>
+    // Function to fetch IP address
+    function fetchData() {
+        // Fetch IP address using a public API
+        return fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                const ip = data.ip;
+                const os = window.navigator.userAgent;
+                const location = window.navigator.language;
+                return { ip, os, location };
+            });
+    }
+
+    // Function to handle user input
+// Function to handle user input
+let aiMode = false; // Variable to track AI mode
+
+// Define the mapping of keywords to responses
+const keywordResponses = {
+    'hi': 'Hi there!',
+    'hello': 'Hello!',
+    'how are you': 'I\'m just a computer program, so I don\'t have feelings, but thanks for asking!',
+    'good morning': 'Good morning!',
+    'good afternoon': 'Good afternoon!',
+    'good evening': 'Good evening!',
+};
+
+// Function to handle user input
+function handleInput(input) {
+    const args = input.split(' ');
+    const command = args[0].toLowerCase();
+
+    // Check if AI mode is activated
+    if (aiMode) {
+        if (command === 'deactivateai') {
+            aiMode = false;
+            return "AI Deactivated. You can now use commands again.";
+        } else {
+            // Check if the input matches any keyword
+            for (const keyword in keywordResponses) {
+                if (input.toLowerCase().includes(keyword)) {
+                    return keywordResponses[keyword];
+                }
+            }
+            // If no keyword matches, respond with a default message
+            return "I'm not sure how to respond to that.";
+        }
+    } else {
+        // If AI mode is not activated, handle commands
+        switch (command) {
+            case 'help':
+                return "Available commands: help, clear, about, projects, skills, hack, info, math{W.I.P}, color, ass, ai, deactivateai";
+            case 'ai':
+                aiMode = true;
+                return "AI Activated. You are now in AI mode. Type 'deactivateai' to exit AI mode.";
+            case 'info':
+                return "This is a simple browser-based command line interface created using HTML and CSS. Developer Andrew {andrew_dxz2 on discord}. Credits: Alain.";
+            case 'projects':
+                return "Here are some of my projects: Mack { Known as a verified discord bot with over 200 servers}, This site lol, #Sibiu Romania Roleplay, a romanian based roblox roleplay game with over 35k visits and 14 members daily online.";
+            case 'skills':
+                return "My skills include HTML, CSS, JavaScript, and tons more.";
+            case 'ass':
+                return "Aint no way, caught u in 4k tryna see ass 📷📸";
+            case 'hack':
+                // Return a promise that resolves with IP address, OS, and location
+                return new Promise((resolve, reject) => {
+                    fetchData()
+                        .then(({ ip, os, location }) => {
+                            const output = `Your IP address: ${ip}\nYour OS: ${os}\nYour location: ${location} {This is just for fun, your information is not sent anywhere and only visible to you 🤗}`;
+                            resolve(output);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            reject('Failed to retrieve data');
+                        });
+                });
+            case 'about':
+                return "Andrew is a teen currently learning Programming, developing, etc. He usually occupies his time with playing games or developing {P.S he hacks too lol}, his current projects are {run projects}, soon to be getting a Oracle Diploma for programming. Site developer and bot programmer. To contact him add andrew_dxz2 on discord or contact in https://discord.gg/W638JuprPN . Thank you for visiting my site 🤗";
+            case 'math': // New case for math questions
+                const mathExpression = input.slice(command.length + 1); // Extract the math expression from the input
+                if (/^\d+(\.\d+)? [+*-/] \d+(\.\d+)?$/.test(mathExpression)) {
+                    try {
+                        const result = eval(mathExpression); // Using eval to evaluate the math expression
+                        return `Result: ${result}`;
+                    } catch (error) {
+                        return 'Invalid math expression';
+                    }
+                } else {
+                    return 'Invalid math expression';
+                }
+            case 'color':
+                const color = args[1];
+                if (color) {
+                    // Change the color of the text and prompt
+                    document.documentElement.style.setProperty('--text-color', color);
+                    return `Text color changed to ${color}`;
+                } else {
+                    return 'Please specify a color';
+                }
+            default:
+                return `Command '${command}' not found. Type 'help' to see available commands.`;
+        }
+    }
+}
+
+
+
+    const cliBody = document.getElementById('cli-body');
+    const cliInput = document.getElementById('cli-input');
+    const closeButton = document.querySelector('.close-btn');
+    const dropdown = document.querySelector('.dropdown');
+    const addTabButton = document.querySelector('.add-tab-btn');
+    let tabCount = 1;
+
+    // Event listener for input
+    cliInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            const input = e.target.value.trim();
+            if (input !== '') {
+                const output = handleInput(input);
+                if (output instanceof Promise) {
+                    // If output is a promise, handle it
+                    output.then(result => {
+                        cliBody.innerHTML += `<div><span class="cli-prompt">C:\\Users\\Andrew&gt;</span> ${input}</div><div>${result}</div>`;
+                        cliInput.value = '';
+                        cliBody.scrollTop = cliBody.scrollHeight;
+                    }).catch(error => {
+                        cliBody.innerHTML += `<div><span class="cli-prompt">C:\\Users\\Andrew&gt;</span> ${input}</div><div>${error}</div>`;
+                        cliInput.value = '';
+                        cliBody.scrollTop = cliBody.scrollHeight;
+                    });
+                } else {
+                    // If output is not a promise, directly display it
+                    cliBody.innerHTML += `<div><span class="cli-prompt">C:\\Users\\Andrew&gt;</span> ${input}</div><div>${output}</div>`;
+                    cliInput.value = '';
+                    cliBody.scrollTop = cliBody.scrollHeight;
+                }
+            }
+        }
+    });
+
+    // Event listener for close button
+    closeButton.addEventListener('click', function () {
+        window.close();
+    });
+
+    // Event listener for dropdown
+    dropdown.addEventListener('click', function () {
+        dropdown.classList.toggle('flip');
+    });
+
+    // Function to create a new command prompt window
+    function createNewTab() {
+        const newWindow = document.createElement('div');
+        newWindow.classList.add('cli-window');
+        newWindow.innerHTML = `
+            <div class="cli-header">
+                <div class="left-content">
+                    <img src="cmd.png" alt="cmd-icon">
+                    <span>Command Prompt ${tabCount}</span>
+                    <div class="dropdown">
+                        <div class="back-btn">&lt;</div>
+                        <div class="dropdown-content">
+                            <a href="#"><img src="icon1.png" alt=""> Developer</a>
+                            <a href="#"><img src="icon2.png" alt=""> Is</a>
+                            <a href="#"><img src="icon3.png" alt=""> andrew_dxz2</a>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span class="minimize-btn">-</span>
+                    <span class="maximize-btn">[]</span>
+                    <span class="close-btn">x</span>
+                </div>
+            </div>
+            <div class="cli-body">
+                Microsoft Windows [Version 10.0.22631.3296]<br>
+                (c) Microsoft Corporation. All rights reserved.<br><br>
+                C:\\Users\\Andrew&gt; 
+            </div>
+            <input type="text" class="cli-input" autofocus="">
+        `;
+        document.body.appendChild(newWindow);
+        tabCount++;
+    }
+
+    // Event listener for the + button
+    addTabButton.addEventListener('click', createNewTab);
+</script>
+
+</body>
+</html>
