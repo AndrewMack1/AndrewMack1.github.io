@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSOD - Windows 11</title>
+    <!-- Add CSS directly within the HTML -->
+    <style>
+        /* BSOD styles */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* Hide overflow to prevent scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover; /* Ensure video covers the entire viewport */
+            z-index: -1; /* Place video behind other content */
+        }
+    </style>
+</head>
+<body>
+    <!-- BSOD image -->
+    <img id="bsodImage" src="bsod2.png" alt="BSOD" style="width: 100vw; height: 100vh; object-fit: cover; display: block;">
+
+    <!-- Audio player for video 1 -->
+    <audio id="audio1" autoplay loop>
+        <source src="audio1.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Audio player for video 2 (hidden initially) -->
+    <audio id="audio2" loop style="display: none;">
+        <source src="audio2.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- JavaScript for playing videos -->
+    <script>
+        // Function to redirect to another page after video 2 ends
+        function redirectToAnotherPage() {
+            window.location.href = "index.html"; // Replace "https://example.com" with the URL of the page you want to redirect to
+        }
+
+        // Function to play videos after 3 seconds
+        setTimeout(function() {
+            // Remove BSOD image
+            document.getElementById('bsodImage').style.display = 'none';
+
+            // Create and play first video
+            var video1 = document.createElement('video');
+            video1.src = 'vid1.mp4';
+            video1.autoplay = true;
+            video1.loop = false;
+            video1.muted = false;
+            document.body.appendChild(video1);
+
+            // Play audio for video 1
+            document.getElementById('audio1').play();
+
+            // Play second video after first one ends
+            video1.onended = function() {
+                var video2 = document.createElement('video');
+                video2.src = 'video2.mp4';
+                video2.autoplay = true;
+                video2.loop = false;
+                video2.muted = false;
+                document.body.appendChild(video2);
+
+                // Show and play audio for video 2
+                document.getElementById('audio2').style.display = 'block';
+                document.getElementById('audio2').play();
+
+                // Redirect to another page after second video ends
+                video2.onended = redirectToAnotherPage;
+            };
+        }, 3000);
+    </script>
+</body>
+</html>
