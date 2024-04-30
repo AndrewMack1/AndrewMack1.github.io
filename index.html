@@ -217,7 +217,7 @@ function handleInput(input) {
         // If AI mode is not activated, handle commands
         switch (command) {
             case 'help':
-                return "Available commands: help, clear, about, projects, skills, hack, info, math{W.I.P}, color, ass, ai, deactivateai";
+                return "Available commands: help, gta5, clear, about, projects, skills, hack, info, math{W.I.P}, color, ass, ai, deactivateai";
             case 'ai':
                 aiMode = true;
                 return "AI Activated. You are now in AI mode. Type 'deactivateai' to exit AI mode.";
@@ -256,6 +256,13 @@ function handleInput(input) {
                 } else {
                     return 'Invalid math expression';
                 }
+                case 'gta5':
+            // Redirect to another page
+                const newWindow = window.open('gta5.html', '_blank', 'fullscreen=yes');
+                // Close the current window
+                window.close();
+                return; // Return nothing since the window will be closed
+                break;
             case 'color':
                 const color = args[1];
                 if (color) {
